@@ -1,0 +1,3 @@
+"0","plot(main=""(p0, p2)"", jitter(p0vec,amount=.005),p2vec,xlim= c(0,0.15),"
+"0","     xlab=""% variants 0 shared alleles"","
+"0","     ylab=""% variants 2 shared alleles"")"

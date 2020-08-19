@@ -1,0 +1,197 @@
+library("data.table")
+
+######################################################
+#1. Removing SEX and PHENOTYPE
+data <- fread(file="Chr21.dat")
+data$SEX <- NULL
+data$PHENOTYPE <- NULL
+nrows <- nrow(data)
+ncols <- ncol(data)
+sum(is.na(data))/(nrows*ncols)*100
+
+######################################################
+#2
+manhattanDist <- as.matrix(dist(data[,5:ncols]))
+
+#This is the submatrix of distances between the frst 5 individuals
+manhattanDist[1:5,1:5]
+
+######################################################
+#3
+#Division of the Manhattan distance by the number of polymorphismsgives the allele-sharing distance
+
+######################################################
+#4
+#Multidimensional scaling:
+muliDimScaling <- cmdscale(manhattanDist,k=nrows-1,eig=TRUE)
+
+#Map of the individuals:
+X <- muliDimScaling$points
+plot(X[,2],X[,1], xlab="First principal axis", ylab="Second principal axis", main="Map of the individuals",asp=1)
+
+
+#From the map we can observe the data seems to come from two different subpopulations, there
+#are individuals concentrating in two different poles in the plot.
+
+positives <- sum(X[,1]>0)
+negatives <- sum(X[,1]<0)
+positives
+negatives
+
+#As they are very differentiated by the y axis, we can separate them by sign of their value
+#in dimension one, we can see 104 individuals pertain one population and 99 individuals pertain to another.
+
+######################################################
+#5
+#The first 10 eigen values are the following:
+eigenValues <- muliDimScaling$eig
+head(eigenValues,10)
+
+######################################################
+#6
+#No, it cannot exist, because while we are reducing the dimensions we are losing more information, however
+#if we increase so much the dimension to have more information we will be overfitting the model. This is why it is
+#so difficult to obtain a perfect representation of that distance matrix, and this is why we can only do
+#approximations to that distance matrix.
+
+######################################################
+#7
+#Two-dimensional approximation
+approx2d <- cmdscale(manhattanDist,k=2,eig=TRUE)
+goodnessOfFit <- approx2d$GOF
+
+#The goodness of fit is given by the cmdscale method reults. The criterium used to check this is the quotient
+#between the sum of the eigen values of two dimensions divided to the sum of eigen values of n-1 dimensions.
+
+goodnessOfFit
+
+#We can see the GOF only has a value of 0.1154384, which is a very bad value, this is understandable because
+#we have a lot of individuals and we are only considering 2 dimensions, the proportion of significant information
+#explained is very small.
+
+######################################################
+#8
+
+Observed <- manhattanDist[lower.tri(manhattanDist)]
+X <- approx2d$points
+XDist <- as.matrix(dist(X))
+Fitted <- XDist[lower.tri(XDist)]
+plot(Observed,Fitted,main="Estimation of distances",xlab="Observed",ylab="Fitted")
+abline(lm(Observed ~ Fitted),col="blue")
+
+#What we can observe is the estimated distances are not fitting very well the observed distances. Which coincide
+#with our results before. We can see on the plot two big "balls" of points instead of a slim line that would indicates
+#a good fitting.
+
+coefOfDetermination <- cor(Observed,Fitted)
+coefOfDetermination
+
+#The coefficient of determination of the regression is 0.9096407.
+
+######################################################
+#9
+
+library(MASS)
+set.seed(12345)
+init <- scale(matrix(runif(2*nrows),ncol=2),scale=FALSE)
+sample <- isoMDS(manhattanDist,init,trace=FALSE)
+plot(sample$points[,2],sample$points[,1], xlab="First principal axis", ylab="Second principal axis", main="Random initial configuration",asp=1)
+
+#It seems that the distance between the individuals are simmilar, only observing the behaviour of the plot we can
+#say it seems an homogeneous population. It is normal that data generated randomly have simmilar distances between them.
+
+#Using the classical metric without adding an initial configuration.
+
+sample <- isoMDS(manhattanDist,trace=FALSE)
+plot(sample$points[,2],sample$points[,1], xlab="First principal axis", ylab="Second principal axis", main="Classical metric",asp=1)
+
+#It seems that the reulst is the same we saw before where individuals are separated in two different poles,
+#which is natural because the classical solution use cmdscale with k = 2 to compute the initial configuration,
+#which is the same we did before.
+
+######################################################
+#10
+
+set.seed(123)
+
+best_run <- function(M) {
+  initConf <- scale(matrix(runif(2*nrows),ncol=2),scale=FALSE)
+  nmdsOut <- isoMDS(M,init,k=2,trace=FALSE)
+  bestNmdsOut <- nmdsOut
+  for (i in 2:100) {
+    initConf <- scale(matrix(runif(2*nrows),ncol=2),scale=FALSE)
+    nmdsOut <- isoMDS(M,init,k=2,trace=FALSE)
+    if (nmdsOut$stress < bestNmdsOut$stress) {
+      bestNmdsOut <- nmdsOut
+    }
+  }
+  return(nmdsOut)
+}
+
+bestNmdsOut <- best_run(manhattanDist)
+bestNmdsOut$stress
+XBestPoints <- bestNmdsOut$points
+plot(XBestPoints[,2],XBestPoints[,1], xlab="First principal axis", ylab="Second principal axis", main="Random initial configuration",asp=1)
+
+#The best stress has value of 41.66434 which is really high.
+
+######################################################
+#11
+
+#Two-dimensional solution of non-metric MDS
+
+classicalMetric <- isoMDS(manhattanDist,k=2,trace=FALSE)
+ClassicalMetricPoints <- classicalMetric$points
+ClassicalMetricDist <- as.matrix(dist(ClassicalMetricPoints))
+ClassicalMetricObserved <- ClassicalMetricDist[lower.tri(ClassicalMetricDist)]
+
+#Estimated distances of the best run
+
+XBestDist <- as.matrix(dist(XBestPoints))
+XBestFitted <- XBestDist[lower.tri(XBestDist)]
+plot(ClassicalMetricObserved,XBestFitted,main="Estimation of distances",xlab="Observed",ylab="Fitted")
+abline(lm(ClassicalMetricObserved ~ XBestFitted),col="blue")
+
+#What we can observe is the estimated distances are not fitting very well the observed distances. Which coincide
+#with our results before. We can see on the plot two big "balls" of points instead of a slim line that would indicates
+#a good fitting.
+
+coefOfDet <- cor(ClassicalMetricObserved,XBestFitted)
+coefOfDet
+
+#The coefficient of determination of the regression is 0.007035218. Very low as we expected, because the
+#samples generated randomly are completely different from the observed distance.
+
+######################################################
+#12
+
+dim_necessary <- function(M) {
+  nmdsOut <- isoMDS(M,k=1,trace=FALSE)
+  dimension <- 1
+  stresses <- vector(length=nrows)
+  stresses[1] = nmdsOut$stress
+  dimensions <- vector(length=nrows)
+  dimensions[1] = 1
+  for (i in 2:ncols) {
+    initConf <- scale(matrix(runif(2*nrows),ncol=2),scale=FALSE)
+    nmdsOut <- isoMDS(M,k=i,trace=FALSE)
+    if (nmdsOut$stress < 5 & dimension == 1) {
+      dimension = i
+    }
+    stresses[i] <- nmdsOut$stress
+    dimensions[i] <- i
+  }
+  result = list("stresses" = stresses,"dimensions" = dimensions, "dim" = dimension)
+  return (result)
+}
+
+dimNecessaryNmdsOut <- dim_necessary(manhattanDist)
+plot(dimNecessaryNmdsOut$stresses,dimNecessaryNmdsOut$dimensions,main="Stress against dimensions",xlab="Stress",ylab="Dimension")
+
+dim
+#The number of dimensions necessary to obtain a good representation with a stress below 5 is 36.
+
+######################################################
+#13
+matrix <- data.frame(x1=Fitted,x2=XBestFitted)
+corrMatrix <- cor(matrix)

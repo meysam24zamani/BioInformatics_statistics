@@ -1,0 +1,4 @@
+"0","ncols <- ncol(data)"
+"0","nrows <- nrow(data)"
+"0","manhattanDist <- as.matrix(dist(data[,7:ncols],method = ""manhattan""))"
+"0","muliDimScaling <- cmdscale(manhattanDist,k=nrows-1,eig=TRUE)"

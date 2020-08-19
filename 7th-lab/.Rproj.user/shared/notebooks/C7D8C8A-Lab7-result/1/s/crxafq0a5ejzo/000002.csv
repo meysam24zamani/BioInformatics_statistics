@@ -1,0 +1,2 @@
+"0","X <- muliDimScaling$points"
+"0","plot(X[,2],X[,1], xlab=""First principal axis"", ylab=""Second principal axis"", main=""Map of the individuals"",asp=1)"

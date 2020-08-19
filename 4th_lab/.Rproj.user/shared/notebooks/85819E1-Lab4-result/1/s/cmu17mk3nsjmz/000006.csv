@@ -1,0 +1,7 @@
+"0","load(""APOE.dat"")
+"
+"2","file ‘APOE.dat’ has magic number 'id rs'
+  Use of save versions prior to 2 is deprecated"
+"2","Error in load(""APOE.dat"") : 
+  bad restore file magic number (file may be corrupted) -- no data loaded
+"

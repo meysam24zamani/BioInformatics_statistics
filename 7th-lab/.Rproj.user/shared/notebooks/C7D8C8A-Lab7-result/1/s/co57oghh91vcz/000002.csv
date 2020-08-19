@@ -1,0 +1,1 @@
+"0","genomeData <- read.table(""CHD.genome"",header=TRUE)"

@@ -1,0 +1,4 @@
+"0","Y.isAmbiguousOrUncertain <- apply(Y, 1, isAmbiguousOrUncertain)
+"
+"2","Error in apply(Y, 1, isAmbiguousOrUncertain) : object 'Y' not found
+"

@@ -1,0 +1,23 @@
+"0","results.exact <- HWExact(data)
+"
+"1","Haldane Exact test for Hardy-Weinberg equilibrium (autosomal)
+"
+"1","using SELOME p-value
+"
+"1","sample counts: nAA = "
+"1"," "
+"1","106"
+"1"," "
+"1","nAB = "
+"1"," "
+"1","1"
+"1"," "
+"1","nBB = "
+"1"," "
+"1","0"
+"1"," "
+"1","
+"
+"1","H0: HWE (D==0), H1: D <> 0 
+D =  0.002336449 p-value =  1 
+"

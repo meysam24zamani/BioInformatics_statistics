@@ -1,0 +1,1 @@
+{"frames":[{"character_number":0,"end_character_number":0,"end_line_number":0,"file":"","func":"load(\"APOE.dat\")","line_number":0}],"message":"Error in load(\"APOE.dat\") : \n  bad restore file magic number (file may be corrupted) -- no data loaded\n"}

@@ -1,0 +1,6 @@
+"0","print(paste0(""Variants for which we reject equilibrium: "", length(significant)))
+"
+"1","[1]"
+"1"," ""Variants for which we reject equilibrium: 33"""
+"1","
+"

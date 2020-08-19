@@ -1,0 +1,1 @@
+"0","plot(main=""(k0, k1)"", genomeData$Z0,genomeData$Z1,asp=1,xlab=expression(k[0]),ylab=expression(k[1]))"

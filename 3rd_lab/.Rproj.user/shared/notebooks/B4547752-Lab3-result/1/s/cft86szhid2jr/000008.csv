@@ -1,0 +1,5 @@
+"0","results.chi <- apply(counts,1,HWChisq, verbose=FALSE, cc=0)
+"
+"2","Error in FUN(newX[, i], ...) : 
+  HWChisq: X is not a 3 by 1 non-negative count vector
+"

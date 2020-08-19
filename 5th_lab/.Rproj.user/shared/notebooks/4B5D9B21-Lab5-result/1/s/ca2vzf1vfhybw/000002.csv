@@ -1,0 +1,5 @@
+"0","plot(dimNecessaryNmdsOut$stresses,dimNecessaryNmdsOut$dimensions,main=""Stress against dimensions"",xlab=""Stress"",ylab=""Dimension"")
+"
+"2","Error in plot(dimNecessaryNmdsOut$stresses, dimNecessaryNmdsOut$dimensions,  : 
+  object 'dimNecessaryNmdsOut' not found
+"

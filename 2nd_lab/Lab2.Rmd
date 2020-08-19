@@ -1,0 +1,259 @@
+---
+title: "BSG - Homework 2"
+author: "HENRY QIU LO & MEYSAM ZAMANI"
+date: "November 25, 2019"
+output: pdf_document
+---
+
+**1. The file TSIChr22v4.raw contains genotype information of individuals from Tuscany in Italy, taken from the 1,000 Genomes project. The datafile contains all single nucleotide polymorphisms on chromosome 22 for which complete information is available. Load this data into the R environment. Use the fread instruction of the package data.table, which is more efficient for reading large datafiles. This data is in (0,1,2) format, where 0 and 2 represent the homozygotes AA and BB, and 1 represents the heterozygote AB. The first six leading columns of the data matrix can be ignored, as they do not contain any genetic information.**
+
+```{r}
+library(data.table)
+download.file("http://www-eio.upc.es/~jan/data/bsg/TSIChr22v4.raw","TSIChr22v4.raw")
+data <- fread("TSIChr22v4.raw", header = TRUE)
+```
+
+
+**2. How many individuals does the database contain, and how many variants? What percentage of the variants is monomorphic? Remove all monomorphic SNPs from the database. How many variants remain in the database?**
+
+```{r}
+dim(data)
+```
+```{r}
+n <- nrow(data)
+p <- ncol(data)
+n
+
+```
+
+```{r}
+data <- data[,7:p]
+
+monomorphic.AA <- which(apply(data,2,function(col) all(col==0)))
+monomorphic.BB <- which(apply(data,2,function(col) all(col==2)))
+monomorphics <- length(monomorphic.AA) + length(monomorphic.BB)
+percentage.monomorphics <- (monomorphics/p)*100
+#X <- data[,-c(monomorphic.AA,monomorphic.BB)]
+X <- data
+dim(X)
+```
+There are a total of 107 individuals and 1102156 variables . 893079 of the variants are monomorphic (all them AA monomorphic), 81.02% of the variants. 
+
+
+**3. Extract polymorphism rs587756191 T from the datamatrix, and determine its genotype counts. Apply a chi-square test for Hardy-Weinberg equilibrium, with and without continuity correction. Also try an exact test, and a permutation test. You can use function HWChisq, HWExact and HWPerm for this purpose. Do you think this variant is in equilibrium? Argue your answer.**
+
+```{r}
+library(genetics)
+genotypeOf <- genotype(X$rs587756191_T,sep="")
+genotypeOfInfo <- summary(genotypeOf)
+genotypeCounts <- genotypeOfInfo$genotype.freq[,1]
+genotypeCounts
+```
+The genotype counts are "genotypeCounts " 
+
+Xi-square test without continuity correction
+```{r}
+chiNoCont <- HWChisq(X, cc= 0)
+chiNoCont
+```
+
+Xi-square test with continuity correction
+```{r}
+chiCount <- HWChisq(X)
+chiCount
+```
+
+Exact test
+```{r}
+exact <- HWExact(X)
+exact
+```
+
+
+Permutation test
+```{r}
+permut <- HWPerm(X)
+permut
+```
+
+
+**4. Determine the genotype counts for all these variants, and store them in a p x 3 matrix.**
+
+**5. Apply a chi-square test without continuity correction for Hardy-Weinberg equilibrium to each SNP. You can use HWChisqStats for this purpose. How many SNPs are significant (use alpha = 0.05)?**
+
+Answer of 4 and 5:
+```{r}
+
+counts <- matrix(t(apply(X,2,function(col) c(sum(col==0),sum(col==1),sum(col==2)))), nrow=ncol(X), ncol=3)
+colnames(counts) <- c("AA", "AB", "BB")
+pvalues <- apply(counts, 1, function(row) HWChisq(row,cc = 0,verbose=FALSE)$pval)
+sum(passTest)
+```
+
+
+**6. How many markers of the remaining non-monomorphic markers would you expect to be out of equilibrium by the effect of chance alone?**
+
+We do not expect any deviation from the Hardy Weinberg equilibrium. If there is any kind of deviation from equilibrium it could be due to a genotyping error or some variants related to a disease.
+
+**7. Which SNP is most significant according to the chi-square test results? Give it genotype counts. In which sense is this genotypic composition unusual?**
+
+
+**8. Apply an Exact test for Hardy-Weinberg equilibrium to each SNP. You can use function HWExactStats for fast computation. How many SNPs are significant (use alpha = 0.05). Is the result consistent with the chi-square test?**
+
+```{r}
+library(HardyWeinberg)
+passTestExact <- HWExactStats(counts)>=0.05
+sum(passTestExact)
+```
+
+```{r}
+length(passTestExact)
+```
+
+```{r}
+length(which(passTestExact == passTest))
+```
+
+
+**9. Which SNP is most significant according to the exact test results? Give its genotype counts. In which sense is this genotypic composition unusual?**
+
+**10. Apply a likelihood ratio test for Hardy-Weinberg equilibrium to each SNP, using the HWLratio function. How many SNPs are significant (use alpha = 0:05). Is the result consistent with the chi-square test?**
+
+```{r}
+passTestLRT <- apply(counts,1,function(col)HWLratio(col,verbose=FALSE)$pval>0.05)
+sum(passTestLRT)
+```
+
+```{r}
+length(which(passTestLRT == passTest))
+```
+
+**11. Apply a permutation test for Hardy-Weinberg equilibrium to the first 10 SNPs, using the classical chi-square test (without continuity correction) as a test statistic. List the 10 p-values, together with the 10 p-values of the exact tests. Are the result consistent?**
+
+```{r}
+aux <- counts[1:10,]
+permutations <- apply(aux,1,function(row)HWPerm(row,verbose=FALSE,cc=0)$pval)
+exact <- apply(aux,1,function(row)HWExact(row,verbose=FALSE)$pval)
+aux <- data.frame(permutations = permutations, exact = exact)
+aux
+```
+
+**12. Depict all SNPs simultaeneously in a ternary plot with function HWTernaryPlot and comment on your result (because many genotype counts repeat, you may use UniqueGenotypeCounts to speed up the computations)**
+
+```{r}
+Y <- UniqueGenotypeCounts(counts, verbose = TRUE)
+```
+
+```{r}
+HWTernaryPlot(Y[,1:3])
+```
+
+We avoid the repeated frequencies in order to speed up the plot. Then as it can be seen a large proportion of the variants fall inside the banana (meaning they follow the Hardy Weinberg equilibrium), this is the same result obtained in the tests but graphically. So we have a larger proportion of variants that follow the law. It is also interesting to see that all points fall in one half of the plot.
+
+**13. Can you explain why half of the ternary diagram is empty?**
+
+Yes, in this case, a half of the plot is empty because in this dataset the frequency of allele B is very small (always less than 0.5 and mostly it is near to 0). So, we can deduce that in this dataset the B allele is a 'rare' allele and it is always the minor allele. The following plot shows the histogram for the B allele frequencies (or 1 - freq(A)).
+
+```{r}
+B.freq <- apply(counts, 1 , function(row) (2*row[3]+row[2])/(2*sum(row)))
+hist(B.freq, xlab="b allele frequency", main="Histogram of B allele frequency")
+```
+
+
+**14. Make a histogram of the p-values obtained in the chi-square test. What distribution would you expect if HWE would hold for the data set? Make a Q-Q plot of the p values obtained in the chi-square test against the quantiles of the distribution that you consider relevant. What is your conclusion?**
+
+```{r}
+chi.values <- apply(counts, 1, function(row) HWChisq(row,cc = 0,verbose=FALSE)$pval)
+hist(chi.values,main="Histogram of p-values (chi-square)",xlab="p-values")
+```
+
+```{r}
+#Exponential
+exp.dist <- 1-rexp(length(chi.values),rate=1/sd(chi.values))
+exp.dist[exp.dist<0] = 0
+qqplot(chi.values, exp.dist, main="qq-plot p-values (chi-square) vs exponential dist", xlab="p-values", -----
+```
+
+We expected the values to be concentrated at 1 (null hypothesis cannot be rejected) but allowing a certain tolerance. By looking at the histogram we can see that more or less the data is grouped at the 1 bin, but not all points have a p-value of 1, it seems that it follows an exponential distribution centered at 1 and the number of SNP decreases exponentially when the p-value is far from 1. 
+If we perform a qqplot for the exponential distribution we can see that the p-values seem to follow this distribution.
+
+**15. Imagine that for a particular marker the counts of the two homozygotes are accidentally interchanged. Would this affect the statistical tests for HWE? Try it on the computer if you want. Argue your answer.**
+
+This should not affect the statistical tests because we are checking that the HWE law is true: f2 AB = 4fAA fBB.
+So, interchanging the values of fAA and fBB should not lead to a different result.
+
+```{r}
+HWChisq(counts[1,], cc =0 , verbose = FALSE)$pval
+```
+
+```{r}
+aux <- c(counts[1,3], counts[1,2], counts[1,1])
+HWChisq(aux, cc =0 , verbose = FALSE)$pval
+```
+
+**16. Compute the inbreeding coefficient (f) for each SNP, and make a histogram of f. You can use function HWf for this purpose. Give descriptive statistics (mean, standard deviation, etc) of ^ f calculated over the set of SNPs. What distribution do you expect f to follow theoretically? Use a probability plot to confirm your idea.**
+
+```{r}
+f.coeff <- apply(counts, 1, function(row) HWf(row))
+hist(f.coeff, main='Histogram of f')
+```
+
+```{r}
+summary(f.coeff)
+```
+
+
+```{r}
+sd(f.coeff)
+```
+
+
+```{r}
+normal <- rnorm(length(f.coeff), mean = mean(f.coeff), sd = sd(f.coeff))
+qqplot(f.coeff, normal, main='qq-plot normal dist')
+```
+
+Above we can observe the histogram and some descriptive statistics for the inbreeding coefficient. We performed a qq-plot to confirm our idea, but we saw that this plot does not follow a straight diagonal, we thaught that this deviation is caused by some of the SNP that fails the equilibrium tests.
+
+**17.Make a plot of the observed chi-square statistics against the inbreeding coefficient (f). What do you observe? Can you give an equation that relates the two statistics?**
+
+```{r}
+chisq <- apply(counts, 1, function(row) HWChisq(row,cc = 0,verbose=FALSE)$chisq)
+plot(f.coeff,chisq, main="Chi-square vs f", xlab="f coeff", ylab="chi-square")
+```
+
+The plot above shows the chi-square values against the f coefficients. Both values are highly correlated, when the f coefficient is 0, the chi-square is 0 too, and when f coefficient starts to be far from 0, then the chi-square increase very fast.
+
+The equation that relates the two coefficients is the following: chi.square = n x f2 = 107 x f2. The following plot shows the relation between the two statistics.
+
+```{r}
+eq = function(f){n*f^2}
+x <- seq(-1,1,0.1)
+plot(x,eq(x),type='l', main="Chi-square vs f", xlab="f coeff", ylab="chi-square")
+points(f.coeff,chisq)
+```
+
+
+**18. We reconsider the exact test for HWE, using different significant levels. Report the number and percentage of significant variants using an exac test for HWE with alpha = 0:10; 0:05; 0:01 and 0.001. State your conclusions.**
+
+```{r}
+exact.results <- HWExactStats(counts)
+computeSignificantVariants <- function(exact.results, alpha){
+  number = sum(exact.results>=alpha)
+  perc = number/length(exact.results)
+  return(list(number=number,perc=perc))
+}
+computeSignificantVariants(exact.results,0.10)
+```
+
+```{r}
+computeSignificantVariants(exact.results,0.05)
+```
+
+```{r}
+computeSignificantVariants(exact.results,0.01)
+```
+
+```{r}
+computeSignificantVariants(exact.results,0.001)
+```

@@ -1,0 +1,4 @@
+"0","dimNecessaryNmdsOut <- dim_necessary(manhattanDist)
+"
+"2","Error in cmdscale(d, k) : 'k' must be in {1, 2, ..  n - 1}
+"

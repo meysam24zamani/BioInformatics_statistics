@@ -1,0 +1,159 @@
+---
+title: "BSG - Homework 4 - Haplotype estimation"
+author: "HENRY QIU LO & MEYSAM ZAMANI"
+date: "December 10, 2019"
+output: pdf_document
+---
+
+**1. Apolipoprotein E (APOE) is a protein involved in Alzheimer's disease. The corresponding gene APOE has been mapped to chromosome 19. The file APOE.dat contains genotype information of unrelated individuals for a set of SNPs in this gene. Load this data into the R environment. APOE.zip contains the corresponding .bim, .fam and .bed files. You can use the .bim file to obtain information about the alleles of each polymorphism.**
+
+First of all we are going to load data.
+```{r}
+data <- read.delim("APOE.dat", header = TRUE, row.names = 1, sep=" ")
+```
+
+
+**2. How many individuals and how many SNPs are there in the database? What percentage of the data is missing?**
+
+```{r}
+nrows <- nrow(data)
+nrows
+```
+We have 107 Individuals
+
+```{r}
+ncols <- ncol(data)
+ncols
+```
+We have 162 SNPs.
+
+```{r}
+#Percentage of missing
+sum(is.na(data))/(nrows*ncols)*100
+```
+We don't have any missing value in this dataset.
+
+
+**3. Assuming all SNPs are bi-allelic, how many haplotypes can theoretically be found for this data set?**
+
+```{r}
+(nHaploPossible <- 2^ncols)
+```
+
+
+**4. Estimate haplotype frequencies using the haplo.stats package (set the minimum posterior probability to 0.001). How many haplotypes do you and? List the estimated probabilities in decreasing order. Which haplotype number is the most common?**
+
+```{r}
+#install.packages("haplo.stats")
+library(haplo.stats)
+Geno <- cbind(substr(data[,1],1,1),substr(data[,1],2,2))
+for(i in 2:ncols) {
+  Geno <- cbind(Geno,substr(data[,i],1,1),substr(data[,i],2,2))
+}
+Haplo.Res <- haplo.em(Geno,locus.label=colnames(data),control=haplo.em.control(min.posterior=0.001))
+Haplo.Res
+```
+
+```{r}
+(Haplo.Res$nreps)
+```
+It is found -- different haplotypes:
+.
+.
+.
+.
+.
+.
+
+So, the most common haplotype has frequency -------- and it is: -------------------------------------------
+
+
+**5. Is the haplotypic constitution of any of the individuals in the database ambiguous or uncertain? For how many? What is the most likely haplotypic constitution of individual NA20763? (identify the constitution by the corresponding haplotype numbers).**
+
+The individuals with ambiguous haplotypic constitutions will be those that are double-side heterozygous
+```{r}
+isAmbiguousOrUncertain <- function(x){
+  # If some is NA, the haplotypic is uncertain
+  isUncertain <- any(is.na(x))
+  # If it is double-side heterozygous, the haplotypic is ambiguous
+  isAmbiguous <- sum( sapply(x, function(y) substr(y,1,1)!=substr(y,2,2)) )> 1
+  return(isUncertain || isAmbiguous)
+}
+Y.isAmbiguousOrUncertain <- apply(Y, 1, isAmbiguousOrUncertain)
+Y.ambiguousOrUncertain <- Y[Y.isAmbiguousOrUncertain,]
+#Number of ambiguous or uncertain and names
+nrow(Y.ambiguousOrUncertain)
+```
+
+
+```{r}
+row.names(Y.ambiguousOrUncertain)
+```
+
+```{r}
+#Set NA to '--'
+Y.ambiguousOrUncertain[is.na(Y.ambiguousOrUncertain)] <- "--"
+Y.ambiguousOrUncertain.str = apply(Y.ambiguousOrUncertain, 1, function(v) paste(v,collapse = ""))
+# Compute the most common haplotypic consitituion.
+ambiguousOrUncertain.count = table(Y.ambiguousOrUncertain.str)
+ambiguousOrUncertain.count[ambiguousOrUncertain.count == max(ambiguousOrUncertain.count)]
+```
+
+
+
+**6. Suppose we would delete polymorphism rs374311741 from the database prior to haplotype estimation. Would this affect the results obtained? Justify your answer.**
+
+
+```{r}
+unique(Y[,'rs374311741'])
+```
+
+**7. Remove all genetic variants that have a minor allele frequency below 0.10 from the database, and re-run haplo.em. How does this affect the number of haplotypes?**
+
+
+```{r}
+Geno <- cbind(substr(aux[,1],1,1),substr(aux[,1],2,2))
+for(i in 2:(m-1)) {
+  Geno <- cbind(Geno,substr(aux[,i],1,1),substr(aux[,i],2,2))
+}
+Haplo.Res2 <- haplo.em(Geno,locus.label=colnames(aux),control=haplo.em.control(min.posterior=0.001))
+Haplo.Res2
+```
+
+
+
+**8. We could consider the newly created haplotypes in our last run of haplo.em as the alleles of a new superlocus. Which is, under the assumption of Hardy-Weinberg equilibrium, the most likely genotype at this new locus? What is the probability of this genotype? Which genotype is the second most likely, and what is its probability?**
+
+```{r}
+#Compute table of frequencies
+alleles.count <- table(unlist(t(Haplo.Res$haplotype)))
+alleles.prov <- alleles.count/sum(alleles.count)
+
+alleles.name <- names(alleles.prov)
+
+genotypes <- c(paste(alleles.name[1], alleles.name[1], sep=""),
+               paste(alleles.name[1], alleles.name[2], sep=""),
+               paste(alleles.name[1], alleles.name[3], sep=""),
+               paste(alleles.name[1], alleles.name[4], sep=""),
+               paste(alleles.name[2], alleles.name[2], sep=""),
+               paste(alleles.name[2], alleles.name[3], sep=""),
+               paste(alleles.name[2], alleles.name[4], sep=""),
+               paste(alleles.name[3], alleles.name[3], sep=""),
+               paste(alleles.name[3], alleles.name[4], sep=""),
+               paste(alleles.name[4], alleles.name[4], sep=""))
+
+result <- c( alleles.prov[1]*alleles.prov[1],
+           2*alleles.prov[1]*alleles.prov[2],
+           2*alleles.prov[1]*alleles.prov[3],
+           2*alleles.prov[1]*alleles.prov[4],
+             alleles.prov[2]*alleles.prov[2],
+           2*alleles.prov[2]*alleles.prov[3],
+           2*alleles.prov[2]*alleles.prov[4],
+             alleles.prov[3]*alleles.prov[3],
+           2*alleles.prov[3]*alleles.prov[4],
+             alleles.prov[4]*alleles.prov[4])
+
+names(result) <- genotypes
+sort(result,decreasing=TRUE)
+```
+

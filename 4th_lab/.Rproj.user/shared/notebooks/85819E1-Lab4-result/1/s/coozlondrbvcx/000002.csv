@@ -1,0 +1,10 @@
+"0","#install.packages(""haplo.stats"")
+library(haplo.stats)
+"
+"2","package ‘haplo.stats’ was built under R version 3.6.1"
+"2","Registered S3 methods overwritten by 'ggplot2':
+  method         from 
+  [.quosures     rlang
+  c.quosures     rlang
+  print.quosures rlang
+"

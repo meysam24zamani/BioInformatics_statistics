@@ -1,0 +1,299 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={BSG - Homework 4 - Haplotype estimation},
+            pdfauthor={HENRY QIU LO \& MEYSAM ZAMANI},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{BSG - Homework 4 - Haplotype estimation}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{HENRY QIU LO \& MEYSAM ZAMANI}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{December 13, 2019}
+
+
+\begin{document}
+\maketitle
+
+\textbf{1. Apolipoprotein E (APOE) is a protein involved in Alzheimer's
+disease. The corresponding gene APOE has been mapped to chromosome 19.
+The file APOE.dat contains genotype information of unrelated individuals
+for a set of SNPs in this gene. Load this data into the R environment.
+APOE.zip contains the corresponding .bim, .fam and .bed files. You can
+use the .bim file to obtain information about the alleles of each
+polymorphism.}
+
+First of all we are going to load data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data <-}\StringTok{ }\KeywordTok{read.delim}\NormalTok{(}\StringTok{"APOE.dat"}\NormalTok{, }\DataTypeTok{header =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{row.names =} \DecValTok{1}\NormalTok{, }\DataTypeTok{sep=}\StringTok{" "}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{2. How many individuals and how many SNPs are there in the
+database? What percentage of the data is missing?}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nrows <-}\StringTok{ }\KeywordTok{nrow}\NormalTok{(data)}
+\NormalTok{ncols <-}\StringTok{ }\KeywordTok{ncol}\NormalTok{(data)}
+\NormalTok{Percentageofmissing <-}\StringTok{ }\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(data))}\OperatorTok{/}\NormalTok{(nrows}\OperatorTok{*}\NormalTok{ncols)}\OperatorTok{*}\DecValTok{100}
+\NormalTok{## [1] "Number of individuals: 107"}
+\NormalTok{## [1] "Number of SNPs: 162"}
+\NormalTok{## [1] "Percentage of missing data: 0%"}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{3. Assuming all SNPs are bi-allelic, how many haplotypes can
+theoretically be found for this data set?}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(nHaploPossible <-}\StringTok{ }\DecValTok{2}\OperatorTok{^}\NormalTok{ncols)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5.846007e+48
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## [1] "Theoretical possible haplotypes: 5.84600654932361e+48"}
+\end{Highlighting}
+\end{Shaded}
+
+This number is 2ˆm where m is the number of SNPs.
+
+\textbf{4. Estimate haplotype frequencies using the haplo.stats package
+(set the minimum posterior probability to 0.001). How many haplotypes do
+you and? List the estimated probabilities in decreasing order. Which
+haplotype number is the most common?}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## [1] "Number of observed haplotypes: 31"}
+
+\NormalTok{## [1] 0.3994864027 0.1308411215 0.0744773885 0.0684337821 0.0501816505}
+\NormalTok{## [6] 0.0467289720 0.0358634245 0.0351614435 0.0225689654 0.0204956857}
+\NormalTok{## [11] 0.0186915888 0.0161150279 0.0086857776 0.0073507292 0.0046728972}
+\NormalTok{## [16] 0.0046728972 0.0046728972 0.0046728972 0.0046728972 0.0046728972}
+\NormalTok{## [21] 0.0046728972 0.0046728972 0.0046728972 0.0046728972 0.0040258310}
+\NormalTok{## [26] 0.0033999885 0.0033021482 0.0028688002 0.0021370639 0.0016597156}
+\NormalTok{## [31] 0.0007955206}
+
+\NormalTok{## [1] "The most common haplotype is the one with ID: 27, with 0.39948640273045 frequency"}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{5. Is the haplotypic constitution of any of the individuals in
+the database ambiguous or uncertain? For how many? What is the most
+likely haplotypic constitution of individual NA20763? (identify the
+constitution by the corresponding haplotype numbers).}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## [1] "There are 19 ambigous subjects:"}
+\NormalTok{## [1] "NA20504" "NA20518" "NA20522" "NA20524" "NA20529" "NA20531" "NA20536"}
+\NormalTok{## [8] "NA20544" "NA20586" "NA20756" "NA20763" "NA20764" "NA20766" "NA20792"}
+\NormalTok{## [15] "NA20796" "NA20798" "NA20804" "NA20815" "NA20818"}
+
+\NormalTok{## [1] "The constitution of the individual NA20763 is defined by the following information: "}
+
+\NormalTok{## id hap1code hap2code post}
+\NormalTok{## 69 59    24      21  0.01536613}
+\NormalTok{## 70 59    18      28  0.96316787}
+\NormalTok{## 71 59    25      20  0.02146601}
+
+\NormalTok{## [1] "The most likely pair of possible haplotypes with the posterior probability 0.963167866211377"}
+
+\NormalTok{## [1] "is: 18 and 28."}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{6. Suppose we would delete polymorphism rs374311741 from the
+database prior to haplotype estimation. Would this affect the results
+obtained? Justify your answer.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{##   Count Proportion}
+\NormalTok{## C 214   1}
+\end{Highlighting}
+\end{Shaded}
+
+We notice that this genotype is monomorphic, therefore this cannot
+change the number of haplotypes. Since there is only one possible
+allele, it would be always a constant in the haplotypes.
+
+\textbf{7. Remove all genetic variants that have a minor allele
+frequency below 0.10 from the database, and re-run haplo.em. How does
+this affect the number of haplotypes?}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## [1] "The number of haplotypes now is 8"}
+\NormalTok{## 8           1           6           4           2           7}
+\NormalTok{## 0.620635582 0.130841121 0.113009278 0.074766355 0.031850535 0.018691589}
+\NormalTok{## 3           5}
+\NormalTok{## 0.005532643 0.004672897}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{8. We could consider the newly created haplotypes in our last
+run of haplo.em as the alleles of a new superlocus. Which is, under the
+assumption of Hardy-Weinberg equilibrium, the most likely genotype at
+this new locus? What is the probability of this genotype? Which genotype
+is the second most likely, and what is its probability?}
+
+The previous haplotypes probabilities are the new superlocus alleles
+probabilities, from which we can build the matrix of genotypes:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{##    p1      p2      p3      p4      p5      p6      p7      p8}
+\NormalTok{## p1 0.01712 0.00417 0.00072 0.00978 0.00061 0.01479 0.00245 0.08120}
+\NormalTok{## p2 0.00417 0.00101 0.00018 0.00238 0.00015 0.00360 0.00060 0.01977}
+\NormalTok{## p3 0.00072 0.00018 0.00003 0.00041 0.00003 0.00063 0.00010 0.00343}
+\NormalTok{## p4 0.00978 0.00238 0.00041 0.00559 0.00035 0.00845 0.00140 0.04640}
+\NormalTok{## p5 0.00061 0.00015 0.00003 0.00035 0.00002 0.00053 0.00009 0.00290}
+\NormalTok{## p6 0.01479 0.00360 0.00063 0.00845 0.00053 0.01277 0.00211 0.07014}
+\NormalTok{## p7 0.00245 0.00060 0.00010 0.00140 0.00009 0.00211 0.00035 0.01160}
+\NormalTok{## p8 0.08120 0.01977 0.00343 0.04640 0.00290 0.07014 0.01160 0.38519}
+\end{Highlighting}
+\end{Shaded}
+
+The genotype is 8,8. The probability of the most likely genotype is the
+one in position {[}8,8{]}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## [1] 0.38519}
+\end{Highlighting}
+\end{Shaded}
+
+The genotype is 1,8. The probability of the second most likely genotype
+is the 2*{[}1,8{]}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## [1] 0.1624}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

@@ -1,0 +1,6 @@
+"0","plot(vector.r2, vector.plink, xlab = ""R^2 - LD function"", ylab = ""R^2 - PLINK"", col = rgb(0, 0, valcol))
+"
+"2","no non-missing arguments to min; returning Inf"
+"2","no non-missing arguments to max; returning -Inf"
+"2","Error in plot.window(...) : need finite 'ylim' values
+"

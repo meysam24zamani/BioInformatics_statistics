@@ -1,0 +1,7 @@
+"0","#Percentage of missing
+sum(is.na(data))/(nrows*ncols)*100
+"
+"1","[1]"
+"1"," 0"
+"1","
+"

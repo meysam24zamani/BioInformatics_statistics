@@ -1,0 +1,1 @@
+{"frames":[{"character_number":0,"end_character_number":0,"end_line_number":0,"file":"","func":"segments(0, 3e+05, 1, 0, lwd = 2, lty = 2)","line_number":0}],"message":"Error in segments(0, 3e+05, 1, 0, lwd = 2, lty = 2) : \n  plot.new has not been called yet\n"}
